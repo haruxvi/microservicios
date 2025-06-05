@@ -6,13 +6,13 @@ spring:
     name: msvc-paciente
   datasource:                       
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/db_hospital
+    url: jdbc:mysql://localhost:3306/db_hospital_vm
     username: root
     password: 
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     database: mysql
     database-platform: org.hibernate.dialect.MySQL8Dialect
     
