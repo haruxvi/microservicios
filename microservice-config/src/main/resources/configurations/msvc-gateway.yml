@@ -1,7 +1,7 @@
 server:
   port: 8080
 
-spring: 
+spring:
   application:
     name: msvc-gateway
   cloud:
@@ -10,13 +10,13 @@ spring:
         locator:
           enabled: true
       routes:
-        - id: pacientes 
+        - id: pacientes
           uri: http://localhost:8090
-          predicates:
+          predicates:             
             - Path=/api/v1/pacientes/**
+        
 
-
-eureka: 
-  client:
+eureka:
+  cliente:
     register-with-eureka: false
     fetch-registry: false
