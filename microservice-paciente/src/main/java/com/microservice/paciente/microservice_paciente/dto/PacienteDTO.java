@@ -1,11 +1,11 @@
-package com.microservice.paciente.dto;
+package com.microservice.paciente.microservice_paciente.dto;
+
+import java.util.Date;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.NoArgsConstructor;
 import lombok.Data;
-
-import java.util.Date;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder

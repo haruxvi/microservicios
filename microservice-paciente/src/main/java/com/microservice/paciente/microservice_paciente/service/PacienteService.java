@@ -1,7 +1,9 @@
-package com.microservice.paciente.service;
+//package com.microservice.paciente.service;
+package com.microservice.paciente.microservice_paciente.service;
 
-import com.microservice.paciente.model.Paciente;
-import com.microservice.paciente.repository.PacienteRepository;
+import com.microservice.paciente.microservice_paciente.model.Paciente;
+import com.microservice.paciente.microservice_paciente.repository.PacienteRepository;
+
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
