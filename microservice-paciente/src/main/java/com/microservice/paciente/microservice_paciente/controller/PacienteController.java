@@ -2,6 +2,7 @@ package com.microservice.paciente.controller;
 
 import com.microservice.paciente.model.Paciente;
 import com.microservice.paciente.service.PacienteService;
+import com.microservice.paciente.dto.PacienteDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 
@@ -28,7 +29,7 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.net.URI;
 import java.time.LocalDateTime;
-import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 @RestController
@@ -37,58 +38,75 @@ public class PacienteController {
 
     @Autowired
     private PacienteService pacienteService;
-// localhhost:8090/api/v1/pacientes/listar
+
+    //localhost:8090/api/v1/pacientes/listar
     @GetMapping("/listar")
     public List<Paciente> getAllPatients(){
         return pacienteService.findAll();
     }
-    // localhhost:8090/api/v1/pacientes/1 
+    //localhost:8090/api/v1/pacientes/1
     @GetMapping("/{id_paciente}")
-    public ResponseEntity<?> getPatientById(@PathVariable Integer id){
-        Optional<Paciente> paciente = pacienteService.getPatientById(id);
+    public ResponseEntity<?> getPatientById(@PathVariable Integer id_paciente){
+
+        Optional<Paciente> paciente = pacienteService.getPatientById(id_paciente);
 
         if(paciente.isPresent()){
-            //Respuesta exitosa con cabeceras personalizadas (opcional)
+            //Retorna la respuesta exitosa con cabeceras personalizadas
+
+            PacienteDTO dto = new PacienteDTO();
+            dto.setId_paciente(paciente.get().getId_paciente());
+            dto.setRut(paciente.get().getRut());
+            dto.setNombres(paciente.get().getNombres());
+            dto.setApellidos(paciente.get().getApellidos());
+            dto.setFechaNacimiento(paciente.get().getFechaNacimiento());
+            dto.setCorreo(paciente.get().getCorreo());
+
             return ResponseEntity.ok()
-                    .header("mi-encabezado", "valor")
-                    .body(paciente.get());
-        } else{
-            //Respuesta de error con cuerpo personalizado ( ej: JSON con mensaje)
+                        .header("mi-encabezado","valor")
+                        .body(paciente.get());
+        }
+        else{
+            //Respuesta de error con cuerpo personalizado
             Map<String,String> errorBody = new HashMap<>();
-            errorBody.put("message","No se encontró el paciente con ID: " + id);
+            errorBody.put("message","No se encontró el paciente con ese ID: " + id_paciente);
             errorBody.put("status","404");
             errorBody.put("timestamp",LocalDateTime.now().toString());
 
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(errorBody);
         }
-
-        //Se usa <?> para permitir que el método retorne:
-        //1. Un objeto Paciente ( en caso de éxito, código 200)
-        //2. Un objeto de error personalizado(en caso de fallo, código 404)
-
-        //Al usar <?>, no estas limitando el cuerpo de la respuesta a un único tipo (como Paciente)
-        //Si no que permites múltiples tipos en la respuesta
-
     }
     
-
-    @PostMapping("path")
-    public ResponseEntity<?> save(@Valid @RequestBody Paciente paciente){
+    @PostMapping
+    public ResponseEntity<?> save(@Valid @RequestBody PacienteDTO pacienteDTO){
         try{
+            Paciente paciente = new Paciente();
+            paciente.setRut(pacienteDTO.getRut());
+            paciente.setNombres(pacienteDTO.getNombres());
+            paciente.setApellidos(pacienteDTO.getApellidos());
+            paciente.setFechaNacimiento(pacienteDTO.getFechaNacimiento());
+            paciente.setCorreo(pacienteDTO.getCorreo());
+        
             Paciente pacienteGuardado = pacienteService.save(paciente);
-
-            //Uri del nuevo recurso creado ( ej: http://localhost:8080/paciente/5)
+        
+            // Crear el DTO de respuesta
+            PacienteDTO responseDTO = new PacienteDTO();
+            responseDTO.setId_paciente(pacienteGuardado.getId_paciente());
+            responseDTO.setRut(pacienteGuardado.getRut());
+            responseDTO.setNombres(pacienteGuardado.getNombres());
+            responseDTO.setApellidos(pacienteGuardado.getApellidos());
+            responseDTO.setFechaNacimiento(pacienteGuardado.getFechaNacimiento());
+            responseDTO.setCorreo(pacienteGuardado.getCorreo());
+        
             URI location = ServletUriComponentsBuilder
                     .fromCurrentRequest()
                     .path("/{id}")
                     .buildAndExpand(pacienteGuardado.getId_paciente())
                     .toUri();
 
-            //Respuesta exitosa con cabeceras y cuerpo
-            return ResponseEntity
-                    .created(location)//Código 201 Created
-                    .body(pacienteGuardado);
+            return ResponseEntity.created(location).body(responseDTO);
+
+            
         } catch(DataIntegrityViolationException e){
             //Ejemplo: Error si hay un campo único duplicado (ej: email repetido)
             Map<String,String> error = new HashMap<>();
@@ -96,38 +114,47 @@ public class PacienteController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(error);//Error 409
         }
     }
- 
+
+    // POST localhost:8090/api/v1/pacientes/1
     @PutMapping("/{id_paciente}")
-    public ResponseEntity<Paciente> update(@PathVariable int id,@RequestBody Paciente paciente){
+    public ResponseEntity<PacienteDTO> update(@PathVariable int id_paciente,@RequestBody PacienteDTO pacienteDTO){
         try{
 
-            Paciente pac = pacienteService.getPatientById2(id);
-            pac.setId_paciente(id);
-            pac.setRut(paciente.getRut());
-            pac.setNombres(paciente.getNombres());
-            pac.setApellidos(paciente.getApellidos());
-            pac.setFechaNacimiento(paciente.getFechaNacimiento());
-            pac.setCorreo(paciente.getCorreo());
+            Paciente paciente = new Paciente();
+            paciente.setId_paciente(id_paciente);
+            paciente.setRut(pacienteDTO.getRut());
+            paciente.setNombres(pacienteDTO.getNombres());
+            paciente.setApellidos(pacienteDTO.getApellidos());
+            paciente.setFechaNacimiento(pacienteDTO.getFechaNacimiento());
+            paciente.setCorreo(pacienteDTO.getCorreo());
 
-            pacienteService.save(paciente);
-            return ResponseEntity.ok(paciente);
+            Paciente pacienteActualizado = pacienteService.save(paciente);
+        
+            PacienteDTO responseDTO = new PacienteDTO();
+            responseDTO.setId_paciente(pacienteActualizado.getId_paciente());
+            responseDTO.setRut(pacienteActualizado.getRut());
+            responseDTO.setNombres(pacienteActualizado.getNombres());
+            responseDTO.setApellidos(pacienteActualizado.getApellidos());
+            responseDTO.setFechaNacimiento(pacienteActualizado.getFechaNacimiento());
+            responseDTO.setCorreo(pacienteActualizado.getCorreo());
+            
+            return ResponseEntity.ok(responseDTO);
 
         }catch(Exception ex){
             return ResponseEntity.notFound().build();
         }
     }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminar(@PathVariable int id){
+    
+    //localhost:8090/api/v1/pacientes/1
+    @DeleteMapping("/{id_paciente}")
+    public ResponseEntity<?> eliminar(@PathVariable int id_paciente){
         try{
 
-            pacienteService.delete(id);
-            return ResponseEntity.noContent().build();//Operacion exitosa pero no hay
-            //contenido para devolver
+            pacienteService.delete(id_paciente);
+            return ResponseEntity.noContent().build();//Operacion exitosa pero no hay contenido para devolver.
 
         }catch(Exception ex){
             return ResponseEntity.notFound().build();
         }
     }
-
 }
