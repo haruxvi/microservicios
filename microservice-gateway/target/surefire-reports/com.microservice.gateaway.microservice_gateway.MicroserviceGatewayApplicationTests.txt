@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.microservice.gateaway.microservice_gateway.MicroserviceGatewayApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 12.35 s -- in com.microservice.gateaway.microservice_gateway.MicroserviceGatewayApplicationTests
